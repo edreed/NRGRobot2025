@@ -7,9 +7,8 @@
  
 package frc.robot.util;
 
-import static frc.robot.Constants.RobotConstants.CORAL_OFFSET_Y;
+import static frc.robot.Constants.RobotConstants.CORAL_ARM_CENTER_Y_OFFSET;
 import static frc.robot.Constants.RobotConstants.ODOMETRY_CENTER_TO_FRONT_BUMPER_DELTA_X;
-import static frc.robot.Constants.VisionConstants.BRANCH_TO_REEF_APRILTAG;
 
 import com.nrg948.preferences.RobotPreferences;
 import com.nrg948.preferences.RobotPreferencesValue;
@@ -102,25 +101,15 @@ public final class FieldUtils {
    * the nearest reef side.
    *
    * @param drivetrain The swerve drivetrain.
-   * @param targetReefPosition The target reef position.
+   * @param reefPosition The target reef position.
    * @return The {@link Pose2d} of the nearest reef AprilTag to the robot's current position.
    */
   public static Pose2d getRobotPoseForNearestReefAprilTag(
-      Swerve drivetrain, ReefPosition targetReefPosition) {
+      Swerve drivetrain, ReefPosition reefPosition) {
     Pose2d currentRobotPose = drivetrain.getPosition();
     Pose2d nearestTagPose = currentRobotPose.nearest(getReefAprilTags());
     double xOffset = ODOMETRY_CENTER_TO_FRONT_BUMPER_DELTA_X;
-    double yOffset = -CORAL_OFFSET_Y;
-    switch (targetReefPosition) {
-      case RIGHT_BRANCH:
-        yOffset += BRANCH_TO_REEF_APRILTAG;
-        break;
-      case LEFT_BRANCH:
-        yOffset -= BRANCH_TO_REEF_APRILTAG;
-        break;
-      case CENTER_REEF:
-        break;
-    }
+    double yOffset = CORAL_ARM_CENTER_Y_OFFSET + reefPosition.yOffset();
 
     return nearestTagPose.plus(new Transform2d(xOffset, yOffset, Rotation2d.k180deg));
   }

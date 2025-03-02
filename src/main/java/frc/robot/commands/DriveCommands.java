@@ -9,7 +9,7 @@ package frc.robot.commands;
 
 import static edu.wpi.first.math.geometry.Rotation2d.k180deg;
 import static edu.wpi.first.math.geometry.Rotation2d.kZero;
-import static frc.robot.Constants.RobotConstants.CORAL_OFFSET_Y;
+import static frc.robot.Constants.RobotConstants.CORAL_ARM_CENTER_Y_OFFSET;
 import static frc.robot.Constants.RobotConstants.ODOMETRY_CENTER_TO_FRONT_BUMPER_DELTA_X;
 import static frc.robot.parameters.Colors.PINK;
 import static frc.robot.parameters.Colors.WHITE;
@@ -84,7 +84,7 @@ public final class DriveCommands {
                         () -> {
                           var pose = getRobotPoseForNearestReefAprilTag(drivetrain, reefPosition);
 
-                          return new DriveStraight(drivetrain, pose, Swerve.getMaxSpeed() * 0.3);
+                          return new DriveToPose(drivetrain, pose, Swerve.getMaxSpeed() * 0.3);
                         },
                         Set.of(drivetrain)),
                     new BlinkColor(statusLEDs, WHITE).asProxy()))
@@ -130,7 +130,8 @@ public final class DriveCommands {
     double xOffset = ODOMETRY_CENTER_TO_FRONT_BUMPER_DELTA_X;
     var targetPose =
         nearestTagPose.plus(
-            new Transform2d(xOffset, targetReefPosition.yOffset() - CORAL_OFFSET_Y, k180deg));
+            new Transform2d(
+                xOffset, targetReefPosition.yOffset() + CORAL_ARM_CENTER_Y_OFFSET, k180deg));
     System.out.println("TARGET pose: " + targetPose);
     System.out.println("Target Branch: " + targetReefPosition);
 
