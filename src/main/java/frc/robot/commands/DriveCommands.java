@@ -13,6 +13,7 @@ import static frc.robot.Constants.RobotConstants.CORAL_OFFSET_Y;
 import static frc.robot.Constants.RobotConstants.ODOMETRY_CENTER_TO_FRONT_BUMPER_DELTA_X;
 import static frc.robot.parameters.Colors.PINK;
 import static frc.robot.parameters.Colors.WHITE;
+import static frc.robot.util.FieldUtils.getRobotPoseForNearestReefAprilTag;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
@@ -26,6 +27,7 @@ import frc.robot.subsystems.Subsystems;
 import frc.robot.subsystems.Swerve;
 import frc.robot.util.FieldUtils;
 import frc.robot.util.ReefPosition;
+import java.util.Set;
 
 /** A namespace for driver command factory methods. */
 public final class DriveCommands {
@@ -60,6 +62,33 @@ public final class DriveCommands {
                 new AlignToReef(subsystems, reefPosition), //
                 new BlinkColor(statusLEDs, WHITE).asProxy()))
         .withName(String.format("AlignToReef(%s)", reefPosition.name()));
+  }
+
+  /**
+   * Returns a command that drives the robot straight to the specified reef position.
+   *
+   * @param subsystems The subsystems container.
+   * @param reefPosition The specified reef position.
+   * @return A command that drives the robot straight to the specified reef position.
+   */
+  public static Command driveStraightToReefPosition(
+      Subsystems subsystems, ReefPosition reefPosition) {
+    StatusLED statusLEDs = subsystems.statusLEDs;
+    Swerve drivetrain = subsystems.drivetrain;
+
+    return (Command)
+        Commands.parallel(
+                new BlinkColor(statusLEDs, PINK).asProxy(),
+                Commands.sequence(
+                    Commands.defer(
+                        () -> {
+                          var pose = getRobotPoseForNearestReefAprilTag(drivetrain, reefPosition);
+
+                          return new DriveStraight(drivetrain, pose, Swerve.getMaxSpeed() * 0.3);
+                        },
+                        Set.of(drivetrain)),
+                    new BlinkColor(statusLEDs, WHITE).asProxy()))
+            .withName(String.format("DriveStraightToReef(%s)", reefPosition.name()));
   }
 
   /**
