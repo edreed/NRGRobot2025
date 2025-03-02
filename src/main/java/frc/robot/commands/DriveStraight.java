@@ -7,17 +7,18 @@
  
 package frc.robot.commands;
 
+import static frc.robot.Constants.RobotConstants.PERIODIC_INTERVAL;
+
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.util.datalog.DataLog;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.util.datalog.StructLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Swerve;
 import java.util.function.Supplier;
@@ -27,26 +28,22 @@ public class DriveStraight extends Command {
   private final Swerve drivetrain;
   private final HolonomicDriveController controller;
   private final Supplier<Translation2d> translationSupplier;
-  private final double maxSpeed;
   private final Supplier<Rotation2d> orientationSupplier;
-  private final Timer timer = new Timer();
+  private final TrapezoidProfile profile;
+
   private Pose2d initialPose;
-  private Rotation2d heading;
-  private Rotation2d orientation;
-  private TrapezoidProfile profile;
-  private TrapezoidProfile.State initialState;
-  private TrapezoidProfile.State goalState;
+  private Pose2d targetPose;
 
   private static final DataLog LOG = DataLogManager.getLog();
 
-  private final DoubleLogEntry logOrientation =
-      new DoubleLogEntry(LOG, "DriveStraight/orientation");
-  private final DoubleLogEntry logDistance = new DoubleLogEntry(LOG, "DriveStraight/distance");
-  private final DoubleLogEntry logHeading = new DoubleLogEntry(LOG, "DriveStraight/heading");
   private final StructLogEntry<Pose2d> logInitialPose =
       StructLogEntry.create(LOG, "DriveStraight/initialPose", Pose2d.struct);
-  private final StructLogEntry<Pose2d> logFinalPose =
-      StructLogEntry.create(LOG, "DriveStraight/finalPose", Pose2d.struct);
+  private final StructLogEntry<Pose2d> logTargetPose =
+      StructLogEntry.create(LOG, "DriveStraight/targetPose", Pose2d.struct);
+  private final StructLogEntry<Pose2d> logTrajectoryPose =
+      StructLogEntry.create(LOG, "DriveStraight/trajectoryPose", Pose2d.struct);
+  private final StructLogEntry<Pose2d> logNextPose =
+      StructLogEntry.create(LOG, "DriveStraight/nextPose", Pose2d.struct);
 
   /**
    * Creates a new DriveStraight that drives robot along the specified vector at maximum speed while
@@ -131,7 +128,9 @@ public class DriveStraight extends Command {
     this.drivetrain = drivetrain;
     this.translationSupplier = translationSupplier;
     this.controller = drivetrain.createDriveController();
-    this.maxSpeed = maxSpeed;
+    this.profile =
+        new TrapezoidProfile(
+            new TrapezoidProfile.Constraints(maxSpeed, Swerve.getMaxAcceleration() * 0.3));
     this.orientationSupplier = orientationSupplier;
 
     addRequirements(drivetrain);
@@ -141,52 +140,59 @@ public class DriveStraight extends Command {
   public void initialize() {
     initialPose = drivetrain.getPosition();
     Translation2d translation = translationSupplier.get();
-    double distance = translation.getNorm();
-    heading = translation.getAngle();
-    orientation = orientationSupplier.get();
-    profile =
-        new TrapezoidProfile(
-            new TrapezoidProfile.Constraints(maxSpeed, Swerve.getMaxAcceleration() * 0.3));
+    Rotation2d orientation = orientationSupplier.get();
 
-    initialState = new TrapezoidProfile.State(0, 0);
-    goalState = new TrapezoidProfile.State(distance, 0);
+    targetPose = initialPose.plus(new Transform2d(translation, orientation));
 
-    timer.reset();
-    timer.start();
-
-    logOrientation.append(orientation.getDegrees());
-    logDistance.append(distance);
-    logHeading.append(heading.getDegrees());
     logInitialPose.append(initialPose);
+    logTargetPose.append(targetPose);
   }
 
   @Override
   public void execute() {
-    // Calculate the next state (position and velocity) of motion using the
+    var currentPose = drivetrain.getPosition();
+    var currentSpeeds = drivetrain.getChassisSpeeds();
+    var delta = targetPose.getTranslation().minus(currentPose.getTranslation());
+    double distanceToGo = delta.getNorm();
+    Rotation2d heading = delta.getAngle();
+
+    // Calculate the next setpoint of motion (position and velocity) using the
     // trapezoidal profile.
-    TrapezoidProfile.State state = profile.calculate(timer.get(), initialState, goalState);
+    double speed = Math.hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
+    var currentState = new TrapezoidProfile.State(0, speed);
+    var goalState = new TrapezoidProfile.State(distanceToGo, 0);
+    var setpoint = profile.calculate(PERIODIC_INTERVAL, currentState, goalState);
 
     // Determine the next position on the field by offsetting the initial position
     // by the distance moved along the line of travel.
-    Translation2d offset = new Translation2d(state.position, heading);
-    Pose2d nextPose = new Pose2d(initialPose.getTranslation().plus(offset), heading);
+    Translation2d offset = new Translation2d(setpoint.position, heading);
+    Pose2d trajectoryPose = new Pose2d(currentPose.getTranslation().plus(offset), heading);
 
     // Calculate the swerve drive module states needed to reach the next state.
     ChassisSpeeds speeds =
-        controller.calculate(drivetrain.getPosition(), nextPose, state.velocity, orientation);
+        controller.calculate(
+            drivetrain.getPosition(), trajectoryPose, setpoint.velocity, targetPose.getRotation());
 
     drivetrain.setChassisSpeeds(speeds);
+
+    var nextPose =
+        new Pose2d(
+            trajectoryPose.getTranslation(),
+            currentPose
+                .getRotation()
+                .plus(new Rotation2d(speeds.omegaRadiansPerSecond * PERIODIC_INTERVAL)));
+
+    logTrajectoryPose.append(trajectoryPose);
+    logNextPose.append(nextPose);
   }
 
   @Override
   public boolean isFinished() {
-    return profile.isFinished(timer.get());
+    return profile.isFinished(0);
   }
 
   @Override
   public void end(boolean interrupted) {
     drivetrain.stopMotors();
-    timer.stop();
-    logFinalPose.append(drivetrain.getPosition());
   }
 }
