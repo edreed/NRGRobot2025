@@ -14,6 +14,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -26,7 +28,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /** SwerveDrive implements swerve drive control. */
-public class SwerveDrive extends RobotDriveBase {
+public class SwerveDrive extends RobotDriveBase implements Sendable {
   private static final DataLog LOG = DataLogManager.getLog();
 
   private static final ChassisSpeeds ZERO_SPEEDS = new ChassisSpeeds();
@@ -290,5 +292,32 @@ public class SwerveDrive extends RobotDriveBase {
           .withSize(3, 2)
           .withPosition((i * 3) % 6, ((i / 2) * 2) % 4);
     }
+  }
+
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    builder.setSmartDashboardType("SwerveDrive");
+
+    builder.addDoubleProperty(
+        "Front Left Angle", () -> modules[0].getState().angle.getDegrees(), null);
+    builder.addDoubleProperty(
+        "Front Left Velocity", () -> modules[0].getState().speedMetersPerSecond, null);
+
+    builder.addDoubleProperty(
+        "Front Right Angle", () -> modules[1].getState().angle.getDegrees(), null);
+    builder.addDoubleProperty(
+        "Front Right Velocity", () -> modules[1].getState().speedMetersPerSecond, null);
+
+    builder.addDoubleProperty(
+        "Back Left Angle", () -> modules[2].getState().angle.getDegrees(), null);
+    builder.addDoubleProperty(
+        "Back Left Velocity", () -> modules[2].getState().speedMetersPerSecond, null);
+
+    builder.addDoubleProperty(
+        "Back Right Angle", () -> modules[3].getState().angle.getDegrees(), null);
+    builder.addDoubleProperty(
+        "Back Right Velocity", () -> modules[3].getState().speedMetersPerSecond, null);
+
+    builder.addDoubleProperty("Robot Angle", () -> getOrientation().getDegrees(), null);
   }
 }

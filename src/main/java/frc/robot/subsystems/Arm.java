@@ -21,20 +21,24 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.nrg948.dashboard.annotations.DashboardBooleanBox;
+import com.nrg948.dashboard.annotations.DashboardCommand;
+import com.nrg948.dashboard.annotations.DashboardDefinition;
+import com.nrg948.dashboard.annotations.DashboardRadialGauge;
+import com.nrg948.dashboard.annotations.DashboardTextDisplay;
+import com.nrg948.dashboard.model.DataBinding;
+import com.nrg948.dashboard.model.FalseIcon;
+import com.nrg948.dashboard.model.TrueIcon;
 import com.nrg948.preferences.RobotPreferences;
 import com.nrg948.preferences.RobotPreferencesLayout;
 import com.nrg948.preferences.RobotPreferencesValue;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -48,7 +52,8 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 @RobotPreferencesLayout(groupName = "Arm", row = 2, column = 4, width = 1, height = 1)
-public class Arm extends SubsystemBase implements ActiveSubsystem, ShuffleboardProducer {
+@DashboardDefinition
+public class Arm extends SubsystemBase implements ActiveSubsystem {
   private static final double TOLERANCE = Math.toRadians(1.5);
   private static final double RADIANS_PER_ROTATION = 2 * Math.PI;
   private static final double ERROR_MARGIN = Math.toRadians(5);
@@ -99,6 +104,15 @@ public class Arm extends SubsystemBase implements ActiveSubsystem, ShuffleboardP
   private DoubleLogEntry logCurrentVelocity;
   private DoubleLogEntry logGoalAngle;
   private BooleanLogEntry logEnabled;
+
+  @DashboardTextDisplay(
+      title = "Test Angle (deg)",
+      row = 1,
+      column = 2,
+      width = 2,
+      height = 1,
+      dataBinding = DataBinding.READ_WRITE)
+  private double testAngle = 0.0;
 
   /** Creates a new Arm from {@link CoralArmParameters}. */
   public Arm(CoralArmParameters parameters, BooleanSupplier hasCoral) {
@@ -219,19 +233,6 @@ public class Arm extends SubsystemBase implements ActiveSubsystem, ShuffleboardP
     logEnabled.update(enabled);
   }
 
-  /** Returns whether the coral arm is at goal angle. */
-  public boolean atGoalAngle(double goalAngle) {
-    return Math.abs(goalAngle - currentAngle) <= TOLERANCE;
-  }
-
-  public boolean atGoalAngle() {
-    return atGoalAngle(this.goalAngle);
-  }
-
-  public boolean isStowed() {
-    return atGoalAngle(this.stowedAngle);
-  }
-
   /** Returns whether the coral arm has an error. */
   public boolean hasError() {
     return hasError;
@@ -255,28 +256,125 @@ public class Arm extends SubsystemBase implements ActiveSubsystem, ShuffleboardP
     updateTelemetry();
   }
 
-  @Override
-  public void addShuffleboardTab() {
-    if (!ENABLE_TAB.getValue()) {
-      return;
-    }
-    ShuffleboardTab armTab = Shuffleboard.getTab(getName());
+  @DashboardTextDisplay(
+      title = "Current Velocity (deg/s)",
+      row = 1,
+      column = 0,
+      width = 2,
+      height = 1)
+  public double getCurrentVelocityDegreesPerSecond() {
+    return Math.toDegrees(currentVelocity);
+  }
 
-    ShuffleboardLayout statusLayout =
-        armTab.getLayout("Status", BuiltInLayouts.kList).withPosition(0, 0).withSize(2, 4);
-    statusLayout.addBoolean("Enabled", () -> enabled);
-    statusLayout.addDouble("Current Angle of Motor Encoder", () -> Math.toDegrees(currentAngle));
-    statusLayout.addDouble("Goal Angle", () -> Math.toDegrees(goalAngle));
-    statusLayout.addDouble("Current Velocity", () -> Math.toDegrees(currentVelocity));
+  @DashboardTextDisplay(title = "Goal Angle (deg)", row = 1, column = 0, width = 2, height = 1)
+  public double getGoalAngleDegrees() {
+    return Math.toDegrees(goalAngle);
+  }
 
-    ShuffleboardLayout controlLayout =
-        armTab.getLayout("Control", BuiltInLayouts.kList).withPosition(2, 0).withSize(2, 4);
-    GenericEntry angle = controlLayout.add("Angle", 0).getEntry();
-    controlLayout.add(
-        Commands.sequence(
-                Commands.runOnce(() -> setGoalAngle(Math.toRadians(angle.getDouble(0))), this),
-                Commands.idle(this).until(this::atGoalAngle))
-            .withName("Set Angle"));
-    controlLayout.add(Commands.runOnce(this::disable, this).withName("Disable"));
+  @DashboardRadialGauge(
+      title = "Current Angle (deg)",
+      row = 2,
+      column = 0,
+      width = 2,
+      height = 2,
+      startAngle = -180,
+      endAngle = 180,
+      min = -180,
+      max = 180)
+  public double getCurrentAngleDegrees() {
+    return Math.toDegrees(currentAngle);
+  }
+
+  @DashboardBooleanBox(
+      title = "Enabled",
+      row = 0,
+      column = 0,
+      width = 1,
+      height = 1,
+      trueIcon = TrueIcon.CHECKMARK,
+      falseIcon = FalseIcon.X)
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  @DashboardBooleanBox(
+      title = "Status",
+      row = 0,
+      column = 1,
+      width = 1,
+      height = 1,
+      trueIcon = TrueIcon.CHECKMARK,
+      falseIcon = FalseIcon.X)
+  public boolean getStatus() {
+    return !hasError;
+  }
+
+  /** Returns whether the coral arm is at goal angle. */
+  public boolean atGoalAngle(double goalAngle) {
+    return Math.abs(goalAngle - currentAngle) <= TOLERANCE;
+  }
+
+  @DashboardBooleanBox(
+      title = "At Goal Angle",
+      row = 0,
+      column = 2,
+      width = 1,
+      height = 1,
+      trueIcon = TrueIcon.CHECKMARK,
+      falseIcon = FalseIcon.X)
+  public boolean atGoalAngle() {
+    return atGoalAngle(this.goalAngle);
+  }
+
+  @DashboardBooleanBox(
+      title = "Is Stowed",
+      row = 0,
+      column = 3,
+      width = 1,
+      height = 1,
+      trueIcon = TrueIcon.CHECKMARK,
+      falseIcon = FalseIcon.X)
+  public boolean isStowed() {
+    return atGoalAngle(this.stowedAngle);
+  }
+
+  @DashboardCommand(
+      title = "Set Test Angle",
+      row = 2,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  public Command setTestAngleCommand() {
+    return Commands.sequence(
+            Commands.runOnce(() -> setGoalAngle(Math.toRadians(testAngle)), this),
+            Commands.idle(this).until(this::atGoalAngle))
+        .withName("Set Test Angle");
+  }
+
+  @DashboardCommand(
+      title = "Disable",
+      row = 3,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  public Command disableCommand() {
+    return Commands.runOnce(this::disable, this).withName("Disable").ignoringDisable(true);
+  }
+
+  @DashboardCommand(
+      title = "Stow Arm",
+      row = 4,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  public Command stowArmCommand() {
+
+    return Commands.sequence(
+            Commands.runOnce(() -> setGoalAngle(stowedAngle), this),
+            Commands.idle(this).until(this::atGoalAngle))
+        .withName("Stow Arm");
   }
 }

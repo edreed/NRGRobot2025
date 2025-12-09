@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import static frc.robot.subsystems.Arm.CORAL_ARM_PARAMETERS;
 import static frc.robot.subsystems.Arm.CORAL_GROUND_INTAKE_ARM_PARAMETERS;
 
+import com.nrg948.dashboard.annotations.DashboardTab;
 import com.nrg948.preferences.RobotPreferences;
 import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -29,16 +30,26 @@ import java.util.stream.Stream;
 
 /** Contains all robot subsystems. */
 public class Subsystems {
+  @DashboardTab(title = "Swerve")
   public final Swerve drivetrain = new Swerve();
+
+  @DashboardTab(title = "Elevator")
   public final Elevator elevator = new Elevator();
 
+  @DashboardTab(title = "Coral Roller")
   public final CoralRoller coralRoller = new CoralRoller();
+
+  @DashboardTab(title = "Coral Arm")
   public final Arm coralArm = new Arm(CORAL_ARM_PARAMETERS, coralRoller::hasCoral);
 
+  @DashboardTab(title = "Coral Intake Grabber")
   public final CoralGroundIntakeGrabber coralIntakeGrabber = new CoralGroundIntakeGrabber();
+
+  @DashboardTab(title = "Coral Intake Arm")
   public final Arm coralIntakeArm =
       new Arm(CORAL_GROUND_INTAKE_ARM_PARAMETERS, coralIntakeGrabber::hasCoral);
 
+  @DashboardTab(title = "Climber")
   public final Climber climber = new Climber();
 
   public final StatusLED statusLEDs = new StatusLED();
@@ -119,6 +130,8 @@ public class Subsystems {
         (cmd) -> {
           cmd.getRequirements().stream().forEach((s) -> commandLogger.get(s.getName()).append(""));
         });
+
+    SubsystemsDashboardTabs.bind(this);
   }
 
   /** Returns an array of all subsystems. */

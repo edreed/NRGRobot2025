@@ -15,23 +15,26 @@ import static frc.robot.util.MotorDirection.CLOCKWISE_POSITIVE;
 import static frc.robot.util.MotorIdleMode.BRAKE;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.nrg948.dashboard.annotations.DashboardBooleanBox;
+import com.nrg948.dashboard.annotations.DashboardCommand;
+import com.nrg948.dashboard.annotations.DashboardDefinition;
+import com.nrg948.dashboard.annotations.DashboardTextDisplay;
+import com.nrg948.dashboard.model.DataBinding;
+import com.nrg948.dashboard.model.FalseIcon;
+import com.nrg948.dashboard.model.TrueIcon;
 import com.nrg948.preferences.RobotPreferences;
 import com.nrg948.preferences.RobotPreferencesLayout;
 import com.nrg948.preferences.RobotPreferencesValue;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.parameters.MotorParameters;
@@ -49,7 +52,8 @@ import java.util.Set;
     type = "Grid Layout",
     gridColumns = 2,
     gridRows = 2)
-public class CoralRoller extends SubsystemBase implements ActiveSubsystem, ShuffleboardProducer {
+@DashboardDefinition
+public class CoralRoller extends SubsystemBase implements ActiveSubsystem {
 
   @RobotPreferencesValue(column = 0, row = 0)
   public static final RobotPreferences.BooleanValue ENABLE_TAB =
@@ -91,10 +95,46 @@ public class CoralRoller extends SubsystemBase implements ActiveSubsystem, Shuff
   private final PIDController pidController = new PIDController(1, 0, 0);
   private final Timer outtakeTimer = new Timer();
 
-  private double goalVelocity = 0;
-  private double currentVelocity = 0;
+  @DashboardBooleanBox(
+      title = "Has Coral",
+      row = 0,
+      column = 0,
+      width = 1,
+      height = 1,
+      trueIcon = TrueIcon.CHECKMARK,
+      falseIcon = FalseIcon.X)
   private boolean hasCoral = false;
+
   private boolean hasError = false;
+
+  @DashboardTextDisplay(title = "Goal Velocity (m/s)", row = 1, column = 0, width = 2, height = 1)
+  private double goalVelocity = 0;
+
+  @DashboardTextDisplay(
+      title = "Current Velocity (m/s)",
+      row = 2,
+      column = 0,
+      width = 2,
+      height = 1)
+  private double currentVelocity = 0;
+
+  @DashboardTextDisplay(
+      title = "Test Velocity (m/s)",
+      row = 0,
+      column = 2,
+      width = 2,
+      height = 1,
+      dataBinding = DataBinding.READ_WRITE)
+  private double testVelocity = 0;
+
+  @DashboardTextDisplay(
+      title = "Test Delay (s)",
+      row = 1,
+      column = 2,
+      width = 2,
+      height = 1,
+      dataBinding = DataBinding.READ_WRITE)
+  private double testDelay = 0;
 
   private DoubleLogEntry logCurrentVelocity =
       new DoubleLogEntry(LOG, "/CoralRoller/currentVelocity");
@@ -171,38 +211,58 @@ public class CoralRoller extends SubsystemBase implements ActiveSubsystem, Shuff
     motor.logTelemetry();
   }
 
-  @Override
-  public void addShuffleboardTab() {
-    if (!ENABLE_TAB.getValue()) {
-      return;
-    }
+  @DashboardBooleanBox(
+      title = "Status",
+      row = 0,
+      column = 1,
+      width = 1,
+      height = 1,
+      trueIcon = TrueIcon.CHECKMARK,
+      falseIcon = FalseIcon.X)
+  public boolean getStatus() {
+    return !hasError;
+  }
 
-    ShuffleboardTab rollerTab = Shuffleboard.getTab("Coral Roller");
-    ShuffleboardLayout statusLayout =
-        rollerTab.getLayout("Status", BuiltInLayouts.kList).withPosition(0, 0).withSize(2, 8);
-    statusLayout.addDouble("Goal Velocity", () -> goalVelocity);
-    statusLayout.addDouble("Current Velocity", () -> currentVelocity);
-    statusLayout.addBoolean("Has Coral", () -> hasCoral);
-    statusLayout.add("Max Velocity", MAX_VELOCITY);
+  @DashboardCommand(
+      title = "Test Intake",
+      row = 2,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  public Command testIntakeCommand() {
+    return Commands.sequence(
+            Commands.runOnce(() -> setGoalVelocity(testVelocity), this),
+            Commands.idle(this).until(this::hasCoral),
+            Commands.defer(() -> Commands.waitSeconds(testDelay), Set.of(this)),
+            Commands.runOnce(this::disable, this))
+        .withName("Test Intake");
+  }
 
-    ShuffleboardLayout controlLayout =
-        rollerTab.getLayout("Control", BuiltInLayouts.kList).withPosition(2, 0).withSize(2, 4);
-    GenericEntry speed = controlLayout.add("Speed", 0).getEntry();
-    GenericEntry delay = controlLayout.add("Delay", 0).getEntry();
-    controlLayout.add(
-        Commands.sequence(
-                Commands.runOnce(() -> goalVelocity = speed.getDouble(0), this),
-                Commands.idle(this).until(this::hasCoral),
-                Commands.defer(() -> Commands.waitSeconds(delay.getDouble(0)), Set.of(this)),
-                Commands.runOnce(this::disable, this))
-            .withName("Intake"));
-    controlLayout.add(
-        Commands.sequence(
-                Commands.runOnce(() -> goalVelocity = speed.getDouble(0), this),
-                Commands.idle(this).until(() -> !hasCoral),
-                Commands.defer(() -> Commands.waitSeconds(delay.getDouble(0)), Set.of(this)),
-                Commands.runOnce(this::disable, this))
-            .withName("Deliver"));
-    controlLayout.add(Commands.runOnce(this::disable, this).withName("Disable"));
+  @DashboardCommand(
+      title = "Test Deliver",
+      row = 3,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  public Command testDeliverCommand() {
+    return Commands.sequence(
+            Commands.runOnce(() -> setGoalVelocity(testVelocity), this),
+            Commands.idle(this).until(() -> !hasCoral),
+            Commands.defer(() -> Commands.waitSeconds(testDelay), Set.of(this)),
+            Commands.runOnce(this::disable, this))
+        .withName("Test Deliver");
+  }
+
+  @DashboardCommand(
+      title = "Disable",
+      row = 4,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  public Command disableCommand() {
+    return Commands.runOnce(this::disable, this).withName("Disable").ignoringDisable(true);
   }
 }

@@ -14,6 +14,13 @@ import static frc.robot.RobotContainer.RobotSelector.PracticeRobot2025;
 import static frc.robot.parameters.MotorParameters.KrakenX60;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.nrg948.dashboard.annotations.DashboardBooleanBox;
+import com.nrg948.dashboard.annotations.DashboardCommand;
+import com.nrg948.dashboard.annotations.DashboardDefinition;
+import com.nrg948.dashboard.annotations.DashboardTextDisplay;
+import com.nrg948.dashboard.model.DataBinding;
+import com.nrg948.dashboard.model.FalseIcon;
+import com.nrg948.dashboard.model.TrueIcon;
 import com.nrg948.preferences.RobotPreferences;
 import com.nrg948.preferences.RobotPreferencesLayout;
 import com.nrg948.preferences.RobotPreferencesValue;
@@ -22,23 +29,18 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.ExponentialProfile;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -49,10 +51,10 @@ import frc.robot.util.MotorIdleMode;
 import frc.robot.util.RelativeEncoder;
 import frc.robot.util.TalonFXAdapter;
 import java.util.Map;
-import java.util.Set;
 
 @RobotPreferencesLayout(groupName = "Elevator", row = 0, column = 5, width = 1, height = 3)
-public class Elevator extends SubsystemBase implements ActiveSubsystem, ShuffleboardProducer {
+@DashboardDefinition
+public class Elevator extends SubsystemBase implements ActiveSubsystem {
 
   private static final DataLog LOG = DataLogManager.getLog();
 
@@ -154,6 +156,15 @@ public class Elevator extends SubsystemBase implements ActiveSubsystem, Shuffleb
 
   private Timer resetEncoderTimer = new Timer();
 
+  @DashboardTextDisplay(
+      title = "Test Height (m)",
+      row = 0,
+      column = 2,
+      width = 2,
+      height = 1,
+      dataBinding = DataBinding.READ_WRITE)
+  private double testHeight = MIN_HEIGHT;
+
   private BooleanLogEntry logIsSeekingGoal = new BooleanLogEntry(LOG, "/Elevator/isSeekingGoal");
   private DoubleLogEntry logCurrentVelocity = new DoubleLogEntry(LOG, "/Elevator/velocity");
   private DoubleLogEntry logCurrentPosition = new DoubleLogEntry(LOG, "/Elevator/position");
@@ -183,8 +194,89 @@ public class Elevator extends SubsystemBase implements ActiveSubsystem, Shuffleb
   }
 
   /** Returns elevator height. */
+  @DashboardTextDisplay(title = "Current Height (m)", row = 0, column = 0, width = 2, height = 1)
   public double getHeight() {
     return this.currentState.position;
+  }
+
+  @DashboardTextDisplay(
+      title = "Current Velocity (m/s)",
+      row = 1,
+      column = 0,
+      width = 2,
+      height = 1)
+  public double getVelocity() {
+    return this.currentState.velocity;
+  }
+
+  @DashboardTextDisplay(title = "Goal Height (m)", row = 2, column = 0, width = 2, height = 1)
+  public double getGoalHeight() {
+    return this.goalState.position;
+  }
+
+  @DashboardTextDisplay(title = "Goal Velocity (m/s)", row = 3, column = 0, width = 2, height = 1)
+  public double getGoalVelocity() {
+    return this.goalState.velocity;
+  }
+
+  @DashboardBooleanBox(
+      title = "Is Seeking Goal",
+      row = 4,
+      column = 0,
+      width = 2,
+      height = 1,
+      trueIcon = TrueIcon.CHECKMARK,
+      falseIcon = FalseIcon.X)
+  public boolean getIsSeekingGoal() {
+    return this.isSeekingGoal;
+  }
+
+  @DashboardCommand(
+      title = "Set Test Height",
+      row = 1,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  private Command setTestHeightCommand() {
+    return Commands.runOnce(() -> setGoalHeight(testHeight, 0), this)
+        .until(() -> atGoalHeight())
+        .withName("Set Test Height");
+  }
+
+  @DashboardCommand(
+      title = "Disable",
+      row = 2,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  private Command disableCommand() {
+    return Commands.runOnce(this::disable, this).withName("Disable").ignoringDisable(true);
+  }
+
+  @DashboardCommand(
+      title = "Reset Encoder",
+      row = 3,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  private Command resetEncoderCommand() {
+    return Commands.runOnce(() -> encoder.reset(), this)
+        .withName("Reset Encoder")
+        .ignoringDisable(true);
+  }
+
+  @DashboardCommand(
+      title = "Stow Elevator",
+      row = 4,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  private Command stowElevatorCommand() {
+    return ElevatorCommands.stowElevator(this);
   }
 
   /**
@@ -336,43 +428,5 @@ public class Elevator extends SubsystemBase implements ActiveSubsystem, Shuffleb
   public void simulationPeriodic() {
     simElevator.setInputVoltage(currentVoltage);
     simElevator.update(0.020);
-  }
-
-  @Override
-  public void addShuffleboardTab() {
-    if (!ENABLE_TAB.getValue()) {
-      return;
-    }
-
-    ShuffleboardTab elevatorTab = Shuffleboard.getTab("Elevator");
-    ShuffleboardLayout elevatorLayout =
-        elevatorTab.getLayout("Status", BuiltInLayouts.kList).withPosition(0, 0).withSize(2, 5);
-    elevatorLayout.addDouble("Current Height", () -> this.currentState.position);
-    elevatorLayout.addDouble("Current Velocity", () -> this.currentState.velocity);
-    elevatorLayout.addDouble("Goal Height", () -> this.goalState.position);
-    elevatorLayout.addDouble("Goal Velocity", () -> this.goalState.velocity);
-    elevatorLayout
-        .addBoolean("Is Enabled", () -> this.isSeekingGoal)
-        .withWidget(BuiltInWidgets.kBooleanBox);
-    elevatorLayout.add("Max Velocity", MAX_SPEED);
-    elevatorLayout.add("Max Acceleration", MAX_ACCELERATION);
-
-    ShuffleboardLayout controlLayout =
-        elevatorTab.getLayout("Control", BuiltInLayouts.kList).withPosition(2, 0).withSize(2, 5);
-    controlLayout.addDouble("Current Height", () -> this.currentState.position);
-    GenericEntry elevatorHeight = controlLayout.add("Elevator Height", 0).getEntry();
-    controlLayout.add(
-        Commands.defer(
-                () ->
-                    Commands.runOnce(() -> this.setGoalHeight(elevatorHeight.getDouble(0), 0))
-                        .until(() -> this.atGoalHeight()),
-                Set.of(this))
-            .withName("Set Height"));
-    controlLayout.add(Commands.runOnce(() -> this.disable(), this).withName("Disable"));
-    controlLayout.add(
-        Commands.runOnce(() -> encoder.reset(), this)
-            .ignoringDisable(true)
-            .withName("Reset Encoder"));
-    controlLayout.add(ElevatorCommands.stowElevator(this));
   }
 }
