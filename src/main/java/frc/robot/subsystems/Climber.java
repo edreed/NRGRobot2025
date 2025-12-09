@@ -16,20 +16,24 @@ import static frc.robot.util.MotorDirection.COUNTER_CLOCKWISE_POSITIVE;
 import static frc.robot.util.MotorIdleMode.BRAKE;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.nrg948.dashboard.annotations.DashboardBooleanBox;
+import com.nrg948.dashboard.annotations.DashboardCommand;
+import com.nrg948.dashboard.annotations.DashboardDefinition;
+import com.nrg948.dashboard.annotations.DashboardRadialGauge;
+import com.nrg948.dashboard.annotations.DashboardTextDisplay;
+import com.nrg948.dashboard.model.DataBinding;
+import com.nrg948.dashboard.model.FalseIcon;
+import com.nrg948.dashboard.model.TrueIcon;
 import com.nrg948.preferences.RobotPreferences;
 import com.nrg948.preferences.RobotPreferences.DoubleValue;
 import com.nrg948.preferences.RobotPreferencesLayout;
 import com.nrg948.preferences.RobotPreferencesValue;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -40,8 +44,9 @@ import frc.robot.util.RevThroughboreEncoderAdapter;
 import frc.robot.util.TalonFXAdapter;
 import java.util.Map;
 
+@DashboardDefinition
 @RobotPreferencesLayout(groupName = "Climber", row = 0, column = 6, width = 2, height = 3)
-public class Climber extends SubsystemBase implements ShuffleboardProducer, ActiveSubsystem {
+public class Climber extends SubsystemBase implements ActiveSubsystem {
   @RobotPreferencesValue
   public static final RobotPreferences.BooleanValue ENABLE_TAB =
       new RobotPreferences.BooleanValue("Climber", "Enable Tab", false);
@@ -88,7 +93,25 @@ public class Climber extends SubsystemBase implements ShuffleboardProducer, Acti
 
   private double currentAngle; // in radians
   private double goalAngle; // in radians
+
+  @DashboardBooleanBox(
+      title = "Enabled",
+      row = 3,
+      column = 0,
+      width = 1,
+      height = 1,
+      trueIcon = TrueIcon.CHECKMARK,
+      falseIcon = FalseIcon.X)
   private boolean enabled;
+
+  @DashboardTextDisplay(
+      title = "Test Angle",
+      row = 0,
+      column = 2,
+      width = 2,
+      height = 1,
+      dataBinding = DataBinding.READ_WRITE)
+  private double testAngleDegrees;
 
   private final AbsoluteAngleEncoder absoluteEncoder =
       new RevThroughboreEncoderAdapter(
@@ -112,7 +135,9 @@ public class Climber extends SubsystemBase implements ShuffleboardProducer, Acti
   private RelativeEncoder encoder = mainMotor.getEncoder();
 
   /** Creates a new Climber subsystem. */
-  public Climber() {}
+  public Climber() {
+    updateTelemetry();
+  }
 
   @Override
   public void periodic() {
@@ -147,12 +172,45 @@ public class Climber extends SubsystemBase implements ShuffleboardProducer, Acti
     logEnabled.update(enabled);
   }
 
+  @DashboardBooleanBox(
+      title = "At Goal",
+      row = 3,
+      column = 1,
+      width = 1,
+      height = 1,
+      trueIcon = TrueIcon.CHECKMARK,
+      falseIcon = FalseIcon.X)
   public boolean atGoalAngle() {
     return MathUtil.isNear(goalAngle, currentAngle, Math.toRadians(TOLERANCE_DEG.getValue()));
   }
 
+  @DashboardTextDisplay(
+      title = "Goal Angle",
+      row = 0,
+      column = 0,
+      width = 2,
+      height = 1,
+      dataBinding = DataBinding.READ_ONLY)
+  public double getGoalAngleDegrees() {
+    return Math.toDegrees(goalAngle);
+  }
+
   public double getCurrentAngle() {
     return currentAngle;
+  }
+
+  @DashboardRadialGauge(
+      title = "Current Angle",
+      startAngle = -180,
+      endAngle = 180,
+      min = -180,
+      max = 180,
+      row = 1,
+      column = 0,
+      width = 2,
+      height = 2)
+  public double getCurrentAngleDegrees() {
+    return Math.toDegrees(currentAngle);
   }
 
   private void updateTelemetry() {
@@ -170,28 +228,28 @@ public class Climber extends SubsystemBase implements ShuffleboardProducer, Acti
     }
   }
 
-  @Override
-  public void addShuffleboardTab() {
-    if (!ENABLE_TAB.getValue()) {
-      return;
-    }
+  @DashboardCommand(
+      title = "Set Test Angle (deg)",
+      row = 1,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  private Command setTestAngleCommand() {
+    return Commands.sequence(
+            Commands.runOnce(() -> setGoalAngle(Math.toRadians(testAngleDegrees)), this),
+            Commands.idle(this).until(this::atGoalAngle))
+        .withName("Set Test Angle (deg)");
+  }
 
-    ShuffleboardTab climberTab = Shuffleboard.getTab(getName());
-
-    ShuffleboardLayout statusLayout =
-        climberTab.getLayout("Status", BuiltInLayouts.kList).withPosition(0, 0).withSize(2, 4);
-    statusLayout.addBoolean("Enabled", () -> enabled);
-    statusLayout.addDouble("Current Angle", () -> Math.toDegrees(currentAngle));
-    statusLayout.addDouble("Goal Angle", () -> Math.toDegrees(goalAngle));
-
-    ShuffleboardLayout controlLayout =
-        climberTab.getLayout("Control", BuiltInLayouts.kList).withPosition(2, 0).withSize(2, 4);
-    GenericEntry angle = controlLayout.add("Angle (deg)", 0).getEntry();
-    controlLayout.add(
-        Commands.sequence(
-                Commands.runOnce(() -> setGoalAngle(Math.toRadians(angle.getDouble(0))), this),
-                Commands.idle(this).until(this::atGoalAngle))
-            .withName("Set Angle (deg)"));
-    controlLayout.add(Commands.runOnce(this::disable, this).withName("Disable"));
+  @DashboardCommand(
+      title = "Disable",
+      row = 2,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  private Command disableClimberCommand() {
+    return Commands.runOnce(this::disable, this).withName("Disable");
   }
 }

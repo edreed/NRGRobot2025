@@ -14,6 +14,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ForwardLimitValue;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.ReverseLimitValue;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
@@ -165,7 +166,10 @@ public final class TalonFXAdapter implements MotorController {
     applyConfig(follower, followerMotorOutputConfigs);
 
     // Configure the follower to follow the leader.
-    Follower followerConfig = new Follower(talonFX.getDeviceID(), isInvertedFromLeader);
+    Follower followerConfig =
+        new Follower(
+            talonFX.getDeviceID(),
+            isInvertedFromLeader ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned);
 
     follower.setControl(followerConfig);
 

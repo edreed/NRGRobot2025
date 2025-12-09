@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.parameters.ElevatorLevel;
 import frc.robot.subsystems.Subsystems;
+import io.arxila.javatuples.LabelValue;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,7 +31,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.javatuples.LabelValue;
 
 /** A namespace for autonomous command factory methods. */
 public final class Autos {

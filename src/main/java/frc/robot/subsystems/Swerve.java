@@ -7,11 +7,16 @@
  
 package frc.robot.subsystems;
 
+import static com.nrg948.dashboard.model.LabelPosition.BOTTOM;
 import static frc.robot.RobotContainer.RobotSelector.CompetitionRobot2025;
 import static frc.robot.RobotContainer.RobotSelector.PracticeRobot2025;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.nrg948.dashboard.annotations.DashboardDefinition;
+import com.nrg948.dashboard.annotations.DashboardLayout;
+import com.nrg948.dashboard.annotations.DashboardSwerveDrive;
+import com.nrg948.dashboard.model.RotationUnit;
 import com.nrg948.preferences.RobotPreferences;
 import com.nrg948.preferences.RobotPreferencesLayout;
 import com.nrg948.preferences.RobotPreferencesValue;
@@ -34,26 +39,16 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.constraint.SwerveDriveKinematicsConstraint;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.util.datalog.StructLogEntry;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
-import frc.robot.commands.DriveToPose;
 import frc.robot.drive.SwerveDrive;
 import frc.robot.drive.SwerveModule;
 import frc.robot.parameters.SwerveAngleEncoder;
@@ -67,11 +62,11 @@ import frc.robot.util.SwerveModuleVelocities;
 import frc.robot.util.SwerveModuleVoltages;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 
+@DashboardDefinition
 @RobotPreferencesLayout(groupName = "Drive", column = 2, row = 0, width = 2, height = 2)
-public class Swerve extends SubsystemBase implements ActiveSubsystem, ShuffleboardProducer {
+public class Swerve extends SubsystemBase implements ActiveSubsystem {
   private static final DataLog LOG = DataLogManager.getLog();
   private static final Rotation2d ROTATE_180_DEGREES = Rotation2d.fromDegrees(180);
 
@@ -122,13 +117,44 @@ public class Swerve extends SubsystemBase implements ActiveSubsystem, Shuffleboa
   private final CANcoder backLeftAngle = PARAMETERS.getAngleEncoder(SwerveAngleEncoder.BackLeft);
   private final CANcoder backRightAngle = PARAMETERS.getAngleEncoder(SwerveAngleEncoder.BackRight);
 
+  @DashboardLayout(
+      title = "Front Left",
+      row = 0,
+      column = 0,
+      width = 2,
+      height = 3,
+      labelPosition = BOTTOM)
   private final SwerveModule frontLeftModule =
       createSwerveModule(frontLeftDriveMotor, frontLeftSteeringMotor, frontLeftAngle, "Front Left");
+
+  @DashboardLayout(
+      title = "Front Right",
+      row = 0,
+      column = 6,
+      width = 2,
+      height = 3,
+      labelPosition = BOTTOM)
   private final SwerveModule frontRightModule =
       createSwerveModule(
           frontRightDriveMotor, frontRightSteeringMotor, frontRightAngle, "Front Right");
+
+  @DashboardLayout(
+      title = "Back Left",
+      row = 3,
+      column = 0,
+      width = 2,
+      height = 3,
+      labelPosition = BOTTOM)
   private final SwerveModule backLeftModule =
       createSwerveModule(backLeftDriveMotor, backLeftSteeringMotor, backLeftAngle, "Back Left");
+
+  @DashboardLayout(
+      title = "Back Right",
+      row = 3,
+      column = 6,
+      width = 2,
+      height = 3,
+      labelPosition = BOTTOM)
   private final SwerveModule backRightModule =
       createSwerveModule(backRightDriveMotor, backRightSteeringMotor, backRightAngle, "Back Right");
 
@@ -141,7 +167,14 @@ public class Swerve extends SubsystemBase implements ActiveSubsystem, Shuffleboa
 
   private final SwerveDriveKinematics kinematics = PARAMETERS.getKinematics();
 
+  @DashboardSwerveDrive(
+      row = 0,
+      column = 2,
+      width = 4,
+      height = 4,
+      rotationUnits = RotationUnit.DEGREES)
   private final SwerveDrive drivetrain;
+
   private final SwerveDrivePoseEstimator odometry;
 
   // The current sensor state updated by the periodic method.
@@ -529,83 +562,5 @@ public class Swerve extends SubsystemBase implements ActiveSubsystem, Shuffleboa
     frontRightSteeringMotor.setIdleMode(idleMode);
     backLeftSteeringMotor.setIdleMode(idleMode);
     backRightSteeringMotor.setIdleMode(idleMode);
-  }
-
-  /** Adds a tab for swerve drive in Shuffleboard. */
-  @Override
-  public void addShuffleboardTab() {
-    if (ENABLE_DRIVE_TAB.getValue()) {
-      ShuffleboardTab swerveDriveTab = Shuffleboard.getTab("Drive");
-
-      drivetrain.addShuffleboardLayouts(swerveDriveTab);
-
-      ShuffleboardLayout odometryLayout =
-          swerveDriveTab
-              .getLayout("Odometry", BuiltInLayouts.kList)
-              .withPosition(6, 0)
-              .withSize(4, 4);
-
-      odometryLayout
-          .add(
-              "Orientation",
-              new Sendable() {
-                @Override
-                public void initSendable(SendableBuilder builder) {
-                  builder.setSmartDashboardType("Gyro");
-                  builder.addDoubleProperty("Value", () -> -getOrientation().getDegrees(), null);
-                }
-              })
-          .withWidget(BuiltInWidgets.kGyro)
-          .withPosition(0, 0);
-
-      ShuffleboardLayout positionLayout =
-          odometryLayout
-              .getLayout("Position", BuiltInLayouts.kGrid)
-              .withProperties(Map.of("Number of columns", 3, "Number of rows", 2));
-
-      positionLayout
-          .addDouble("X", () -> odometry.getEstimatedPosition().getX())
-          .withPosition(0, 0)
-          .withWidget(BuiltInWidgets.kTextView);
-      positionLayout
-          .addDouble("Y", () -> odometry.getEstimatedPosition().getY())
-          .withPosition(1, 0)
-          .withWidget(BuiltInWidgets.kTextView);
-
-      positionLayout
-          .addDouble("est. X", () -> lastVisionMeasurement.getX())
-          .withPosition(0, 1)
-          .withWidget(BuiltInWidgets.kTextView);
-      positionLayout
-          .addDouble("est. Y", () -> lastVisionMeasurement.getY())
-          .withPosition(1, 1)
-          .withWidget(BuiltInWidgets.kTextView);
-      positionLayout
-          .addDouble("est. angle", () -> lastVisionMeasurement.getRotation().getDegrees())
-          .withPosition(2, 1)
-          .withWidget(BuiltInWidgets.kTextView);
-      ShuffleboardLayout driveStraight =
-          swerveDriveTab
-              .getLayout("Drive Straight", BuiltInLayouts.kList)
-              .withPosition(0, 4)
-              .withSize(4, 2);
-      GenericEntry distanceX = driveStraight.add("Distance X", 0).getEntry();
-      GenericEntry distanceY = driveStraight.add("Distance Y", 0).getEntry();
-      GenericEntry orientation = driveStraight.add("Orientation", 0).getEntry();
-      driveStraight.add(
-          Commands.defer(
-                  () -> {
-                    double dx = distanceX.getDouble(0);
-                    double dy = distanceY.getDouble(0);
-                    double angle = orientation.getDouble(0);
-                    return new DriveToPose(
-                        this,
-                        new Translation2d(dx, dy),
-                        Swerve.getMaxSpeed() * 0.25,
-                        Rotation2d.fromDegrees(angle));
-                  },
-                  Set.of(this))
-              .withName("Drive Straight"));
-    }
   }
 }

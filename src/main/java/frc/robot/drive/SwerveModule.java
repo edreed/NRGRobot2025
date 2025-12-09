@@ -7,6 +7,9 @@
  
 package frc.robot.drive;
 
+import com.nrg948.dashboard.annotations.DashboardDefinition;
+import com.nrg948.dashboard.annotations.DashboardRadialGauge;
+import com.nrg948.dashboard.annotations.DashboardTextDisplay;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -46,6 +49,7 @@ import java.util.function.Supplier;
  * "https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-feedforward.html">
  * Introduction to DC Motor Feedforward</a> articles of the WPILib documentation.
  */
+@DashboardDefinition
 public class SwerveModule {
   private static final DataLog LOG = DataLogManager.getLog();
 
@@ -308,6 +312,28 @@ public class SwerveModule {
    */
   public Rotation2d getWheelRotation2d() {
     return position.angle;
+  }
+
+  @DashboardRadialGauge(
+      title = "Wheel Angle (deg)",
+      startAngle = -180,
+      endAngle = 180,
+      min = -180,
+      max = 180,
+      numberOfLabels = 0,
+      showPointer = true)
+  public double getWheelAngleDegrees() {
+    return getWheelRotation2d().getDegrees();
+  }
+
+  @DashboardTextDisplay(title = "Wheel Position (m)")
+  public double getWheelPositionMeters() {
+    return getPosition().distanceMeters;
+  }
+
+  @DashboardTextDisplay(title = "Wheel Velocity (m/s)")
+  public double getWheelVelocityMetersPerSecond() {
+    return getState().speedMetersPerSecond;
   }
 
   /**

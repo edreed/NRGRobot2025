@@ -23,21 +23,21 @@ import static frc.robot.util.ReefPosition.LEFT_BRANCH;
 import static frc.robot.util.ReefPosition.RIGHT_BRANCH;
 
 import au.grapplerobotics.CanBridge;
-import com.nrg948.preferences.RobotPreferences;
+import com.nrg948.dashboard.annotations.DashboardBooleanBox;
+import com.nrg948.dashboard.annotations.DashboardCameraStream;
+import com.nrg948.dashboard.annotations.DashboardComboBoxChooser;
+import com.nrg948.dashboard.annotations.DashboardDefinition;
 import com.nrg948.preferences.RobotPreferences.EnumValue;
 import com.nrg948.preferences.RobotPreferencesLayout;
 import com.nrg948.preferences.RobotPreferencesValue;
 import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.cscore.HttpCamera.HttpCameraKind;
-import edu.wpi.first.cscore.VideoSource;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -62,6 +62,7 @@ import frc.robot.util.MotorIdleMode;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 @RobotPreferencesLayout(groupName = "Preferences", column = 0, row = 0, width = 2, height = 2)
+@DashboardDefinition
 public class RobotContainer {
   private static final int COAST_MODE_DELAY = 30;
 
@@ -70,6 +71,36 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Subsystems subsystems = new Subsystems();
   private final RobotAutonomous autonomous = new RobotAutonomous(subsystems, null);
+
+  @DashboardComboBoxChooser(
+      title = "Autonomous",
+      column = 0,
+      row = 0,
+      width = 2,
+      height = 2,
+      sortOptions = true)
+  private final SendableChooser<Command> autoChooser = autonomous.getAutoChooser();
+
+  @DashboardComboBoxChooser(
+      title = "Robot Type",
+      column = 0,
+      row = 2,
+      width = 2,
+      height = 1,
+      sortOptions = true)
+  private RobotSelector robotType = RobotSelector.CompetitionRobot2025;
+
+  @DashboardCameraStream(title = "Front Camera", column = 2, row = 0, width = 4, height = 3)
+  private final HttpCamera frontCamera =
+      new HttpCamera(
+          "photonvision_Port_1190_Output_MJPEG_Server",
+          "http://photonvision.local:1190/stream.mjpg",
+          HttpCameraKind.kMJPGStreamer);
+
+  @DashboardBooleanBox(title = "Has Coral", column = 6, row = 0, width = 2, height = 2)
+  private boolean hasCoral() {
+    return subsystems.coralRoller.hasCoral();
+  }
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
@@ -91,7 +122,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and command bindings. */
   public RobotContainer() {
-    initShuffleboard();
+    // initShuffleboard();
     CanBridge.runTCP();
 
     subsystems.drivetrain.setDefaultCommand(
@@ -134,34 +165,6 @@ public class RobotContainer {
     phaseLogger.append("Teleop");
     subsystems.setIdleMode(MotorIdleMode.BRAKE);
     subsystems.setInitialStates();
-  }
-
-  private void initShuffleboard() {
-    RobotPreferences.addShuffleBoardTab();
-
-    subsystems.initShuffleboard();
-
-    ShuffleboardTab operatorTab = Shuffleboard.getTab("Operator");
-    autonomous.addShuffleboardLayout(operatorTab);
-
-    operatorTab
-        .addBoolean("Has Coral", () -> subsystems.coralRoller.hasCoral())
-        .withSize(2, 2)
-        .withPosition(6, 0);
-
-    if (subsystems.frontRightCamera.isPresent()) {
-      VideoSource video =
-          new HttpCamera(
-              "photonvision_Port_1184_Output_MJPEG_Server",
-              "http://photonvision.local:1184/stream.mjpg",
-              HttpCameraKind.kMJPGStreamer);
-
-      operatorTab
-          .add("Front Camera", video)
-          .withWidget(BuiltInWidgets.kCameraStream)
-          .withSize(4, 3)
-          .withPosition(2, 0);
-    }
   }
 
   /**

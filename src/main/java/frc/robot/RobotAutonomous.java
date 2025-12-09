@@ -61,6 +61,10 @@ public class RobotAutonomous {
     }
   }
 
+  public SendableChooser<Command> getAutoChooser() {
+    return this.autoChooser;
+  }
+
   /**
    * Returns the autonomous command selected in the chooser.
    *

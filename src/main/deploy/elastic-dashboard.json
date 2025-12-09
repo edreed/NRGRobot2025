@@ -1,0 +1,1071 @@
+{
+  "version" : 1.0,
+  "grid_size" : 128.0,
+  "tabs" : [ {
+    "name" : "Operator",
+    "grid_layout" : {
+      "layouts" : [ ],
+      "containers" : [ {
+        "title" : "Autonomous",
+        "type" : "ComboBox Chooser",
+        "x" : 0.0,
+        "y" : 0.0,
+        "width" : 256.0,
+        "height" : 256.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Operator/Autonomous",
+          "period" : 0.06,
+          "sort_options" : true
+        }
+      }, {
+        "title" : "Robot Type",
+        "type" : "ComboBox Chooser",
+        "x" : 0.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Operator/Robot Type",
+          "period" : 0.06,
+          "sort_options" : true
+        }
+      }, {
+        "title" : "Front Camera",
+        "type" : "Camera Stream",
+        "x" : 256.0,
+        "y" : 0.0,
+        "width" : 512.0,
+        "height" : 384.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Operator/Front Camera",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Has Coral",
+        "type" : "Boolean Box",
+        "x" : 768.0,
+        "y" : 0.0,
+        "width" : 256.0,
+        "height" : 256.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Operator/Has Coral",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "None",
+          "false_color" : -65536,
+          "false_icon" : "None"
+        }
+      } ]
+    }
+  }, {
+    "name" : "Swerve",
+    "grid_layout" : {
+      "layouts" : [ {
+        "title" : "Front Left",
+        "type" : "List Layout",
+        "x" : 0.0,
+        "y" : 0.0,
+        "width" : 256.0,
+        "height" : 384.0,
+        "properties" : {
+          "label_position" : "BOTTOM"
+        },
+        "children" : [ {
+          "title" : "Wheel Angle (deg)",
+          "type" : "Radial Gauge",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Front Left/Wheel Angle (deg)",
+            "period" : 0.06,
+            "min_value" : -180.0,
+            "max_value" : 180.0,
+            "start_angle" : -180.0,
+            "end_angle" : 180.0,
+            "number_of_labels" : 0,
+            "wrap_value" : false,
+            "show_pointer" : true,
+            "show_ticks" : true
+          }
+        }, {
+          "title" : "Wheel Position (m)",
+          "type" : "Text Display",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Front Left/Wheel Position (m)",
+            "period" : 0.06
+          }
+        }, {
+          "title" : "Wheel Velocity (m/s)",
+          "type" : "Text Display",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Front Left/Wheel Velocity (m+s)",
+            "period" : 0.06
+          }
+        } ]
+      }, {
+        "title" : "Front Right",
+        "type" : "List Layout",
+        "x" : 768.0,
+        "y" : 0.0,
+        "width" : 256.0,
+        "height" : 384.0,
+        "properties" : {
+          "label_position" : "BOTTOM"
+        },
+        "children" : [ {
+          "title" : "Wheel Angle (deg)",
+          "type" : "Radial Gauge",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Front Right/Wheel Angle (deg)",
+            "period" : 0.06,
+            "min_value" : -180.0,
+            "max_value" : 180.0,
+            "start_angle" : -180.0,
+            "end_angle" : 180.0,
+            "number_of_labels" : 0,
+            "wrap_value" : false,
+            "show_pointer" : true,
+            "show_ticks" : true
+          }
+        }, {
+          "title" : "Wheel Position (m)",
+          "type" : "Text Display",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Front Right/Wheel Position (m)",
+            "period" : 0.06
+          }
+        }, {
+          "title" : "Wheel Velocity (m/s)",
+          "type" : "Text Display",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Front Right/Wheel Velocity (m+s)",
+            "period" : 0.06
+          }
+        } ]
+      }, {
+        "title" : "Back Left",
+        "type" : "List Layout",
+        "x" : 0.0,
+        "y" : 384.0,
+        "width" : 256.0,
+        "height" : 384.0,
+        "properties" : {
+          "label_position" : "BOTTOM"
+        },
+        "children" : [ {
+          "title" : "Wheel Angle (deg)",
+          "type" : "Radial Gauge",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Back Left/Wheel Angle (deg)",
+            "period" : 0.06,
+            "min_value" : -180.0,
+            "max_value" : 180.0,
+            "start_angle" : -180.0,
+            "end_angle" : 180.0,
+            "number_of_labels" : 0,
+            "wrap_value" : false,
+            "show_pointer" : true,
+            "show_ticks" : true
+          }
+        }, {
+          "title" : "Wheel Position (m)",
+          "type" : "Text Display",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Back Left/Wheel Position (m)",
+            "period" : 0.06
+          }
+        }, {
+          "title" : "Wheel Velocity (m/s)",
+          "type" : "Text Display",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Back Left/Wheel Velocity (m+s)",
+            "period" : 0.06
+          }
+        } ]
+      }, {
+        "title" : "Back Right",
+        "type" : "List Layout",
+        "x" : 768.0,
+        "y" : 384.0,
+        "width" : 256.0,
+        "height" : 384.0,
+        "properties" : {
+          "label_position" : "BOTTOM"
+        },
+        "children" : [ {
+          "title" : "Wheel Angle (deg)",
+          "type" : "Radial Gauge",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Back Right/Wheel Angle (deg)",
+            "period" : 0.06,
+            "min_value" : -180.0,
+            "max_value" : 180.0,
+            "start_angle" : -180.0,
+            "end_angle" : 180.0,
+            "number_of_labels" : 0,
+            "wrap_value" : false,
+            "show_pointer" : true,
+            "show_ticks" : true
+          }
+        }, {
+          "title" : "Wheel Position (m)",
+          "type" : "Text Display",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Back Right/Wheel Position (m)",
+            "period" : 0.06
+          }
+        }, {
+          "title" : "Wheel Velocity (m/s)",
+          "type" : "Text Display",
+          "x" : 0.0,
+          "y" : 0.0,
+          "width" : 128.0,
+          "height" : 128.0,
+          "properties" : {
+            "topic" : "/SmartDashboard/Swerve/Back Right/Wheel Velocity (m+s)",
+            "period" : 0.06
+          }
+        } ]
+      } ],
+      "containers" : [ {
+        "title" : "drivetrain",
+        "type" : "SwerveDrive",
+        "x" : 256.0,
+        "y" : 0.0,
+        "width" : 512.0,
+        "height" : 512.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Swerve/drivetrain",
+          "period" : 0.06,
+          "show_robot_rotation" : true,
+          "rotation_units" : "Degrees"
+        }
+      } ]
+    }
+  }, {
+    "name" : "Elevator",
+    "grid_layout" : {
+      "layouts" : [ ],
+      "containers" : [ {
+        "title" : "Test Height (m)",
+        "type" : "Text Display",
+        "x" : 256.0,
+        "y" : 0.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Elevator/Test Height (m)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Current Height (m)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 0.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Elevator/Current Height (m)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Current Velocity (m/s)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Elevator/Current Velocity (m+s)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Goal Height (m)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Elevator/Goal Height (m)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Goal Velocity (m/s)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 384.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Elevator/Goal Velocity (m+s)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Is Seeking Goal",
+        "type" : "Boolean Box",
+        "x" : 0.0,
+        "y" : 512.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Elevator/Is Seeking Goal",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Set Test Height",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Elevator/Set Test Height",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Disable",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Elevator/Disable",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Reset Encoder",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 384.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Elevator/Reset Encoder",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Stow Elevator",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 512.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Elevator/Stow Elevator",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      } ]
+    }
+  }, {
+    "name" : "Coral Roller",
+    "grid_layout" : {
+      "layouts" : [ ],
+      "containers" : [ {
+        "title" : "Has Coral",
+        "type" : "Boolean Box",
+        "x" : 0.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Roller/Has Coral",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Goal Velocity (m/s)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Roller/Goal Velocity (m+s)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Current Velocity (m/s)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Roller/Current Velocity (m+s)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Test Velocity (m/s)",
+        "type" : "Text Display",
+        "x" : 256.0,
+        "y" : 0.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Roller/Test Velocity (m+s)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Test Delay (s)",
+        "type" : "Text Display",
+        "x" : 256.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Roller/Test Delay (s)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Status",
+        "type" : "Boolean Box",
+        "x" : 128.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Roller/Status",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Test Intake",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Roller/Test Intake",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Test Deliver",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 384.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Roller/Test Deliver",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Disable",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 512.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Roller/Disable",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      } ]
+    }
+  }, {
+    "name" : "Coral Arm",
+    "grid_layout" : {
+      "layouts" : [ ],
+      "containers" : [ {
+        "title" : "Test Angle (deg)",
+        "type" : "Text Display",
+        "x" : 256.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Arm/Test Angle (deg)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Current Velocity (deg/s)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Arm/Current Velocity (deg+s)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Goal Angle (deg)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Arm/Goal Angle (deg)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Current Angle (deg)",
+        "type" : "Radial Gauge",
+        "x" : 0.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 256.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Arm/Current Angle (deg)",
+          "period" : 0.06,
+          "min_value" : -180.0,
+          "max_value" : 180.0,
+          "start_angle" : -180.0,
+          "end_angle" : 180.0,
+          "number_of_labels" : 8,
+          "wrap_value" : false,
+          "show_pointer" : true,
+          "show_ticks" : true
+        }
+      }, {
+        "title" : "Enabled",
+        "type" : "Boolean Box",
+        "x" : 0.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Arm/Enabled",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Status",
+        "type" : "Boolean Box",
+        "x" : 128.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Arm/Status",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "At Goal Angle",
+        "type" : "Boolean Box",
+        "x" : 256.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Arm/At Goal Angle",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Is Stowed",
+        "type" : "Boolean Box",
+        "x" : 384.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Arm/Is Stowed",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Set Test Angle",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Arm/Set Test Angle",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Disable",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 384.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Arm/Disable",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Stow Arm",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 512.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Arm/Stow Arm",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      } ]
+    }
+  }, {
+    "name" : "Coral Intake Grabber",
+    "grid_layout" : {
+      "layouts" : [ ],
+      "containers" : [ {
+        "title" : "Enabled",
+        "type" : "Boolean Box",
+        "x" : 0.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Grabber/Enabled",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Has Coral",
+        "type" : "Boolean Box",
+        "x" : 128.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Grabber/Has Coral",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Goal Velocity (m/s)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Grabber/Goal Velocity (m+s)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Current Velocity (m/s)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Grabber/Current Velocity (m+s)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Test Intake Speed",
+        "type" : "Text Display",
+        "x" : 256.0,
+        "y" : 0.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Grabber/Test Intake Speed",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Test Hold Speed",
+        "type" : "Text Display",
+        "x" : 256.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Grabber/Test Hold Speed",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Set Test Intake Speed",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Grabber/Set Test Intake Speed",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Set Test Hold Speed",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 384.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Grabber/Set Test Hold Speed",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Disable",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 512.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Grabber/Disable",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      } ]
+    }
+  }, {
+    "name" : "Coral Intake Arm",
+    "grid_layout" : {
+      "layouts" : [ ],
+      "containers" : [ {
+        "title" : "Test Angle (deg)",
+        "type" : "Text Display",
+        "x" : 256.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Arm/Test Angle (deg)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Current Velocity (deg/s)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Arm/Current Velocity (deg+s)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Goal Angle (deg)",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Arm/Goal Angle (deg)",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Current Angle (deg)",
+        "type" : "Radial Gauge",
+        "x" : 0.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 256.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Arm/Current Angle (deg)",
+          "period" : 0.06,
+          "min_value" : -180.0,
+          "max_value" : 180.0,
+          "start_angle" : -180.0,
+          "end_angle" : 180.0,
+          "number_of_labels" : 8,
+          "wrap_value" : false,
+          "show_pointer" : true,
+          "show_ticks" : true
+        }
+      }, {
+        "title" : "Enabled",
+        "type" : "Boolean Box",
+        "x" : 0.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Arm/Enabled",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Status",
+        "type" : "Boolean Box",
+        "x" : 128.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Arm/Status",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "At Goal Angle",
+        "type" : "Boolean Box",
+        "x" : 256.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Arm/At Goal Angle",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Is Stowed",
+        "type" : "Boolean Box",
+        "x" : 384.0,
+        "y" : 0.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Arm/Is Stowed",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Set Test Angle",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Arm/Set Test Angle",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Disable",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 384.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Arm/Disable",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Stow Arm",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 512.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Coral Intake Arm/Stow Arm",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      } ]
+    }
+  }, {
+    "name" : "Climber",
+    "grid_layout" : {
+      "layouts" : [ ],
+      "containers" : [ {
+        "title" : "Enabled",
+        "type" : "Boolean Box",
+        "x" : 0.0,
+        "y" : 384.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Climber/Enabled",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Test Angle",
+        "type" : "Text Display",
+        "x" : 256.0,
+        "y" : 0.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Climber/Test Angle",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "At Goal",
+        "type" : "Boolean Box",
+        "x" : 128.0,
+        "y" : 384.0,
+        "width" : 128.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Climber/At Goal",
+          "period" : 0.06,
+          "true_color" : -16711936,
+          "true_icon" : "Checkmark",
+          "false_color" : -65536,
+          "false_icon" : "X"
+        }
+      }, {
+        "title" : "Goal Angle",
+        "type" : "Text Display",
+        "x" : 0.0,
+        "y" : 0.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Climber/Goal Angle",
+          "period" : 0.06
+        }
+      }, {
+        "title" : "Current Angle",
+        "type" : "Radial Gauge",
+        "x" : 0.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 256.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Climber/Current Angle",
+          "period" : 0.06,
+          "min_value" : -180.0,
+          "max_value" : 180.0,
+          "start_angle" : -180.0,
+          "end_angle" : 180.0,
+          "number_of_labels" : 8,
+          "wrap_value" : false,
+          "show_pointer" : true,
+          "show_ticks" : true
+        }
+      }, {
+        "title" : "Set Test Angle (deg)",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 128.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Climber/Set Test Angle (deg)",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      }, {
+        "title" : "Disable",
+        "type" : "Command",
+        "x" : 256.0,
+        "y" : 256.0,
+        "width" : 256.0,
+        "height" : 128.0,
+        "properties" : {
+          "topic" : "/SmartDashboard/Climber/Disable",
+          "period" : 0.06,
+          "show_type" : true,
+          "maximize_button_space" : true
+        }
+      } ]
+    }
+  } ]
+}

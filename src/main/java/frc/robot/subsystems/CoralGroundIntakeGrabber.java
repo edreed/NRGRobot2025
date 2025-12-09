@@ -19,22 +19,25 @@ import static frc.robot.util.MotorDirection.COUNTER_CLOCKWISE_POSITIVE;
 import static frc.robot.util.MotorIdleMode.BRAKE;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.nrg948.dashboard.annotations.DashboardBooleanBox;
+import com.nrg948.dashboard.annotations.DashboardCommand;
+import com.nrg948.dashboard.annotations.DashboardDefinition;
+import com.nrg948.dashboard.annotations.DashboardTextDisplay;
+import com.nrg948.dashboard.model.DataBinding;
+import com.nrg948.dashboard.model.FalseIcon;
+import com.nrg948.dashboard.model.TrueIcon;
 import com.nrg948.preferences.RobotPreferences;
 import com.nrg948.preferences.RobotPreferencesLayout;
 import com.nrg948.preferences.RobotPreferencesValue;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -53,8 +56,8 @@ import frc.robot.util.TalonFXAdapter;
     type = "Grid Layout",
     gridColumns = 1,
     gridRows = 3)
-public class CoralGroundIntakeGrabber extends SubsystemBase
-    implements ActiveSubsystem, ShuffleboardProducer {
+@DashboardDefinition
+public class CoralGroundIntakeGrabber extends SubsystemBase implements ActiveSubsystem {
 
   @RobotPreferencesValue(column = 0, row = 0)
   public static final RobotPreferences.BooleanValue ENABLE_TAB =
@@ -92,10 +95,54 @@ public class CoralGroundIntakeGrabber extends SubsystemBase
   private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(KS, KV);
   private final PIDController pidController = new PIDController(1, 0, 0);
 
-  private double goalVelocity = 0;
-  private double currentVelocity = 0;
+  @DashboardBooleanBox(
+      title = "Enabled",
+      row = 0,
+      column = 0,
+      width = 1,
+      height = 1,
+      trueIcon = TrueIcon.CHECKMARK,
+      falseIcon = FalseIcon.X)
   private boolean enabled;
+
+  @DashboardBooleanBox(
+      title = "Has Coral",
+      row = 0,
+      column = 1,
+      width = 1,
+      height = 1,
+      trueIcon = TrueIcon.CHECKMARK,
+      falseIcon = FalseIcon.X)
   private boolean hasCoral = false;
+
+  @DashboardTextDisplay(title = "Goal Velocity (m/s)", row = 1, column = 0, width = 2, height = 1)
+  private double goalVelocity = 0;
+
+  @DashboardTextDisplay(
+      title = "Current Velocity (m/s)",
+      row = 2,
+      column = 0,
+      width = 2,
+      height = 1)
+  private double currentVelocity = 0;
+
+  @DashboardTextDisplay(
+      title = "Test Intake Speed",
+      row = 0,
+      column = 2,
+      width = 2,
+      height = 1,
+      dataBinding = DataBinding.READ_WRITE)
+  private double testIntakeSpeed = 0.0;
+
+  @DashboardTextDisplay(
+      title = "Test Hold Speed",
+      row = 1,
+      column = 2,
+      width = 2,
+      height = 1,
+      dataBinding = DataBinding.READ_WRITE)
+  private double testHoldSpeed = 0.0;
 
   private DoubleLogEntry logCurrentVelocity =
       new DoubleLogEntry(LOG, "/CoralGroundIntakeGrabber/currentVelocity");
@@ -137,8 +184,6 @@ public class CoralGroundIntakeGrabber extends SubsystemBase
   public void setIdleMode(MotorIdleMode idleMode) {
     if (CompetitionRobot2025 != null || PracticeRobot2025 != null) {
       motor.setIdleMode(idleMode);
-    } else {
-      return;
     }
   }
 
@@ -166,29 +211,38 @@ public class CoralGroundIntakeGrabber extends SubsystemBase
     motor.logTelemetry();
   }
 
-  @Override
-  public void addShuffleboardTab() {
-    if (!ENABLE_TAB.getValue()) {
-      return;
-    }
+  @DashboardCommand(
+      title = "Set Test Intake Speed",
+      row = 2,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  public Command setTestIntakeSpeedCommand() {
+    return Commands.runOnce(() -> setGoalVelocity(testIntakeSpeed), this)
+        .withName("Set Test Intake Speed");
+  }
 
-    ShuffleboardTab rollerTab = Shuffleboard.getTab("Coral Ground Intake Grabber");
-    ShuffleboardLayout statusLayout =
-        rollerTab.getLayout("Status", BuiltInLayouts.kList).withPosition(0, 0).withSize(2, 4);
-    statusLayout.addBoolean("Enabled", () -> enabled);
-    statusLayout.addDouble("Goal Velocity", () -> goalVelocity);
-    statusLayout.addDouble("Current Velocity", () -> currentVelocity);
-    statusLayout.addBoolean("Has Coral", () -> hasCoral);
-    statusLayout.add("Max Velocity", MAX_VELOCITY);
+  @DashboardCommand(
+      title = "Set Test Hold Speed",
+      row = 3,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  public Command setTestHoldSpeedCommand() {
+    return Commands.runOnce(() -> setGoalVelocity(testHoldSpeed), this)
+        .withName("Set Test Hold Speed");
+  }
 
-    ShuffleboardLayout controlLayout =
-        rollerTab.getLayout("Control", BuiltInLayouts.kList).withPosition(2, 0).withSize(2, 4);
-    GenericEntry intakeSpeed = controlLayout.add("Intake Speed", 0).getEntry();
-    controlLayout.add(
-        Commands.runOnce(() -> setGoalVelocity(intakeSpeed.getDouble(0)), this).withName("Intake"));
-    GenericEntry holdSpeed = controlLayout.add("Hold Speed", 0).getEntry();
-    controlLayout.add(
-        Commands.runOnce(() -> setGoalVelocity(holdSpeed.getDouble(0)), this).withName("Hold"));
-    controlLayout.add(Commands.runOnce(this::disable, this).withName("Disable"));
+  @DashboardCommand(
+      title = "Disable",
+      row = 4,
+      column = 2,
+      width = 2,
+      height = 1,
+      fillWidget = true)
+  public Command disableCommand() {
+    return Commands.runOnce(this::disable, this).withName("Disable").ignoringDisable(true);
   }
 }
